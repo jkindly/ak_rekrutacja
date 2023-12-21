@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\User\Application\Command\CreateUser;
 
+use App\Common\Mailer\SMPTMailer;
 use App\Core\User\Domain\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -13,6 +14,7 @@ class CreateUserHandler
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly SMPTMailer $mailer,
     ) {
     }
 
@@ -23,5 +25,11 @@ class CreateUserHandler
         ));
 
         $this->entityManager->flush();
+
+        $this->mailer->send(
+            $command->email,
+            'Rejestracja konta',
+            'Zarejestrowano konto w systemie. Aktywacja konta trwa do 24h',
+        );
     }
 }

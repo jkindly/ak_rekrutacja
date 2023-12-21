@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\User\UserInterface\Cli;
 
+use App\Common\Mailer\MailerInterface;
 use App\Core\User\Application\Command\CreateUser\CreateUserCommand;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -25,6 +26,7 @@ class CreateUser extends Command
     public function __construct(
         private readonly MessageBusInterface $bus,
         private readonly ValidatorInterface $validator,
+        private readonly MailerInterface $mailer,
     ) {
         parent::__construct();
     }
@@ -49,6 +51,12 @@ class CreateUser extends Command
         }
 
         $this->bus->dispatch(new CreateUserCommand($email));
+
+        $this->mailer->send(
+            $email,
+            'Rejestracja konta',
+            'Zarejestrowano konto w systemie. Aktywacja konta trwa do 24h',
+        );
 
         $io->success('Użytkownik został dodany');
 
